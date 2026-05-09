@@ -2,6 +2,8 @@ HELP.md
 # Configuración local con credenciales
 application-local.yml
 .env
+.env.local
+.env.*.local
 
 # Maven
 target/
