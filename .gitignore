@@ -1,8 +1,19 @@
 HELP.md
+# Configuración local con credenciales
+application-local.yml
+.env
+
+# Maven
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+*.class
+*.jar
+
+# --- Local configuration files (secrets) ---
+**/application-local.yml
+**/application-local.properties
 
 ### STS ###
 .apt_generated
@@ -31,3 +42,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# OS
+.DS_Store
