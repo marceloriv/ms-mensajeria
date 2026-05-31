@@ -21,24 +21,6 @@ services:
     networks:
       - ticketti-network
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: ms-mensajeria-rabbitmq
-    restart: unless-stopped
-    ports:
-      - "5673:5672"
-      - "15673:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - ticketti-network
-
   app:
     build:
       context: .
@@ -48,11 +30,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     ports:
       - "${APP_PORT:-8085}:8085"
+    networks:
+      - ticketti-network
     environment:
+      SERVER_PORT: 8085
       # Datasource para Spring Boot
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-mensajeria_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
@@ -69,12 +52,10 @@ services:
       SPRING_CONFIG_IMPORT: optional:configserver:${CONFIG_SERVER_URL:-http://host.docker.internal:8888}
       # Eureka
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://host.docker.internal:8761/eureka/}
-    networks:
-      - ticketti-network
 
 volumes:
   mysql-data:
 
 networks:
   ticketti-network:
-    driver: bridge
+    external: true
