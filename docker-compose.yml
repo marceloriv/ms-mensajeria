@@ -4,7 +4,7 @@ services:
     container_name: ms-mensajeria-mysql
     restart: unless-stopped
     ports:
-      - "${DB_PORT:-3307}:3306"
+      - "${DB_PORT:-3308}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_DATABASE: ${DB_NAME:-mensajeria_db}
@@ -45,13 +45,27 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      # Mapear a propiedades Spring Boot (spring.rabbitmq.*)
+      SPRING_RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASS:-guest}
       # Mail
       MAIL_USERNAME: ${MAIL_USERNAME:-notificaciones.ticketti@gmail.com}
       MAIL_PASSWORD: ${MAIL_PASSWORD:?Set MAIL_PASSWORD in .env}
+      # Mapeo para Spring Boot properties (resuelve spring.mail.username/password)
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-notificaciones.ticketti@gmail.com}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      # SMTP defaults para activar autoconfiguración de JavaMailSender
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_PROTOCOL: ${SPRING_MAIL_PROTOCOL:-smtp}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:-true}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:-true}
       # Config Server (opcional)
       SPRING_CONFIG_IMPORT: optional:configserver:${CONFIG_SERVER_URL:-http://host.docker.internal:8888}
-      # Eureka
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://host.docker.internal:8761/eureka/}
+      # Eureka (usar el servicio discovery-server en la red docker)
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://discovery-server:8761/eureka/}
 
 volumes:
   mysql-data:
