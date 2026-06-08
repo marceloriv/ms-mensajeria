@@ -1,6 +1,10 @@
 package com.ticketti.ms_mensajeria.config;
 
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -20,9 +24,9 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY      = "pago.aprobado";
 
     @Bean
-    public TopicExchange exchange() {
+    public DirectExchange tickettiExchange() {
         // durable=true: sobrevive reinicios de RabbitMQ
-        return new TopicExchange(EXCHANGE, true, false);
+        return new DirectExchange(EXCHANGE, true, false);
     }
 
     @Bean
@@ -37,19 +41,21 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding bindingMensajeria(Queue queueMensajeria,
-                                     TopicExchange exchange) {
+                                     DirectExchange tickettiExchange) {
         return BindingBuilder
                 .bind(queueMensajeria)
-                .to(exchange)
+                .to(tickettiExchange)
                 .with(ROUTING_KEY);
     }
 
     @Bean
+    @SuppressWarnings("removal")
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
+    @SuppressWarnings({"null", "removal"})
     public RabbitTemplate rabbitTemplate(ConnectionFactory cf) {
         RabbitTemplate template = new RabbitTemplate(cf);
         template.setMessageConverter(messageConverter());
