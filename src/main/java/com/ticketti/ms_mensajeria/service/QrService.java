@@ -29,6 +29,11 @@ public class QrService {
      * @return imagen PNG en bytes, lista para adjuntar al correo
      */
     public byte[] generarQr(String contenido) {
+        // Validar ANTES de llamar a ZXing
+        if (contenido == null || contenido.isBlank()) {
+            throw new NotificacionException("El contenido del QR no puede estar vacío");
+        }
+
         try {
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix matrix = writer.encode(
