@@ -7,9 +7,9 @@ services:
       - "${DB_PORT:-3308}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
-      MYSQL_DATABASE: ${DB_NAME:-mensajeria_db}
-      MYSQL_USER: ${DB_USER:-ticketti_app}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mensajeria_db}
+      MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -37,9 +37,9 @@ services:
     environment:
       SERVER_PORT: 8085
       # Datasource para Spring Boot
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-mensajeria_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-mensajeria_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       # RabbitMQ
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
