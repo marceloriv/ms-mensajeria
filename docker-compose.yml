@@ -2,6 +2,7 @@ services:
   mysql:
     image: mysql:8.4
     container_name: ms-mensajeria-mysql
+    command: ["mysqld", "--authentication-policy=caching_sha2_password,,"]
     restart: unless-stopped
     ports:
       - "${DB_PORT:-3308}:3306"
@@ -12,7 +13,6 @@ services:
       MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
-      - ../mysql-custom.cnf:/etc/mysql/conf.d/custom.cnf:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
