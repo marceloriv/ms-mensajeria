@@ -31,6 +31,7 @@ public class SecurityConfig {
 						// Swagger & OpenApi publicos
 						.requestMatchers(
 								"/v3/api-docs/**",
+								"/api-docs/**",
 								"/swagger-ui/**",
 								"/swagger-ui.html"
 						).permitAll()
@@ -41,6 +42,8 @@ public class SecurityConfig {
 						).permitAll()
 						// Lectura de notificaciones propias (consumido internamente)
 						.requestMatchers(HttpMethod.GET, "/api/v1/notificaciones/**").permitAll()
+						// Formulario de contacto público (cualquier visitante puede escribir)
+						.requestMatchers(HttpMethod.POST, "/api/v1/notificaciones/contacto").permitAll()
 						// Escritura requiere JWT
 						.requestMatchers(HttpMethod.POST, "/api/v1/notificaciones/**").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/v1/notificaciones/**").authenticated()
