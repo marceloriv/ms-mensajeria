@@ -62,6 +62,15 @@ public class NotificacionController {
                 .body(notificacionService.enviarRecordatorio(dto));
     }
 
+    // POST /api/notificaciones/contacto (público — no requiere JWT)
+    @PostMapping("/contacto")
+    @Operation(summary = "Formulario de contacto — notifica al equipo y envía confirmación al remitente")
+    public ResponseEntity<Void> enviarContacto(
+            @Valid @RequestBody NotificacionContactoRequest dto) {
+        notificacionService.enviarContacto(dto);
+        return ResponseEntity.ok().build();
+    }
+
     // GET /api/notificaciones/historial/{idUsuario}
     @GetMapping("/historial/{idUsuario}")
     @Operation(summary = "Historial de notificaciones de un usuario")
