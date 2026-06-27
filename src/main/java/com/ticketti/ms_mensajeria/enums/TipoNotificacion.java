@@ -9,5 +9,6 @@ public enum TipoNotificacion {
     CONFIRMACION_COMPRA,   // correo + QR tras pago aprobado
     RECOMENDACION,         // solo si hay consentimiento explícito
     DEVOLUCION,            // notificación de reembolso aprobado/rechazado
-    RECORDATORIO_EVENTO    // aviso "tu evento es mañana"
+    RECORDATORIO_EVENTO,   // aviso "tu evento es mañana"
+    CONTACTO               // mensaje desde el formulario de contacto
 }
