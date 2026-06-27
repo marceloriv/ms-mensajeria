@@ -91,7 +91,38 @@ public class NotificationFactory {
                 .build();
     }
 
+    /**
+     * Crea la notificación de contacto dirigida al equipo Ticketti.
+     * El idUsuario es 0L porque el remitente puede ser anónimo.
+     */
+    public NotificacionModel crearContacto(
+            NotificacionContactoRequest req, String correoEquipo) {
+        return NotificacionModel.builder()
+                .idUsuario(0L)
+                .correoDestinatario(correoEquipo)
+                .nombreDestinatario("Equipo Ticketti")
+                .tipo(TipoNotificacion.CONTACTO)
+                .asunto("Nuevo mensaje de contacto: " + req.getAsunto())
+                .contenido(buildContenidoContacto(req))
+                .build();
+    }
+
     // --- Constructores de contenido HTML ---
+
+    private String buildContenidoContacto(NotificacionContactoRequest req) {
+        return String.format("""
+            <h2>Nuevo mensaje de contacto</h2>
+            <ul>
+              <li><strong>Nombre:</strong> %s</li>
+              <li><strong>Email:</strong> %s</li>
+              <li><strong>Asunto:</strong> %s</li>
+            </ul>
+            <h3>Mensaje:</h3>
+            <p>%s</p>
+            """,
+                req.getNombre(), req.getCorreo(), req.getAsunto(), req.getMensaje()
+        );
+    }
 
     private String buildContenidoTicket(EnviarTicketRequestDTO dto) {
         return String.format("""
