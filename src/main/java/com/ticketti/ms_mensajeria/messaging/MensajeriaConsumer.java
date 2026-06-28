@@ -1,8 +1,10 @@
 package com.ticketti.ms_mensajeria.messaging;
 
 import com.ticketti.ms_mensajeria.config.RabbitMQConfig;
+import com.ticketti.ms_mensajeria.dto.EnviarDevolucionRequestDTO;
 import com.ticketti.ms_mensajeria.dto.EnviarTicketRequestDTO;
 import com.ticketti.ms_mensajeria.service.NotificacionService;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -35,6 +37,13 @@ public class MensajeriaConsumer {
                         "carrito={}, usuario={}",
                 evento.getIdCarrito(),
                 evento.getUsuarioId());
+
+        if (evento.getCorreoUsuario() == null || evento.getNombreUsuario() == null) {
+            log.warn("Evento pago.aprobado carrito {} descartado: " +
+                    "correoUsuario o nombreUsuario nulos — revisar enriquecimiento en ms-carrito",
+                    evento.getIdCarrito());
+            return;
+        }
 
         try {
             // Construir el DTO que espera el servicio
@@ -70,6 +79,44 @@ public class MensajeriaConsumer {
                             "error={}",
                     evento.getIdCarrito(), e.getMessage());
             // Re-lanzar para que RabbitMQ reintente
+            throw e;
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_DEVOLUCION)
+    public void procesarDevolucion(CompraConfirmadaEvent evento) {
+        log.info("Evento recibido en devolucion.queue: carrito={}, usuario={}",
+                evento.getIdCarrito(), evento.getUsuarioId());
+
+        if (evento.getCorreoUsuario() == null || evento.getNombreUsuario() == null) {
+            log.warn("Evento compra.revertida carrito {} descartado: correo o nombre nulos",
+                    evento.getIdCarrito());
+            return;
+        }
+
+        try {
+            BigDecimal total = evento.getTotal() != null ? evento.getTotal() : BigDecimal.ZERO;
+            BigDecimal montoDonacion = evento.getMontoDonacion() != null
+                    ? evento.getMontoDonacion() : BigDecimal.ZERO;
+            BigDecimal montoDevolucion = total.subtract(montoDonacion)
+                    .multiply(new BigDecimal("0.85"));
+
+            EnviarDevolucionRequestDTO dto = new EnviarDevolucionRequestDTO();
+            dto.setIdUsuario(evento.getUsuarioId());
+            dto.setIdDevolucion(evento.getIdCarrito());
+            dto.setCorreoDestinatario(evento.getCorreoUsuario());
+            dto.setNombreDestinatario(evento.getNombreUsuario());
+            dto.setEstadoDevolucion("APROBADA");
+            dto.setMontoDevolucion(montoDevolucion);
+            dto.setPlazoAcreditacion(5);
+
+            notificacionService.enviarDevolucion(evento.getIdCarrito(), dto);
+
+            log.info("Correo de devolución enviado: carrito={}", evento.getIdCarrito());
+
+        } catch (Exception e) {
+            log.error("Error procesando devolución: carrito={}, error={}",
+                    evento.getIdCarrito(), e.getMessage());
             throw e;
         }
     }

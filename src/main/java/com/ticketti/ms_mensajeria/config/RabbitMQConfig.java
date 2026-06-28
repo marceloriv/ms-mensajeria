@@ -17,11 +17,13 @@ public class RabbitMQConfig {
     // Mismo exchange que MSCarrito — NO cambiar este valor
     public static final String EXCHANGE         = "ticketti.exchange";
 
-    // Queue PROPIA de MS-Mensajería
-    public static final String QUEUE_MENSAJERIA = "mensajeria.queue";
+    // Queue PROPIA de MS-Mensajería (confirmación de compra)
+    public static final String QUEUE_MENSAJERIA       = "mensajeria.queue";
+    public static final String ROUTING_KEY            = "pago.aprobado";
 
-    // Routing key que publica MSCarrito
-    public static final String ROUTING_KEY      = "pago.aprobado";
+    // Queue para notificaciones de devolución
+    public static final String QUEUE_DEVOLUCION       = "devolucion.queue";
+    public static final String ROUTING_KEY_DEVOLUCION = "compra.revertida";
 
     @Bean
     public DirectExchange tickettiExchange() {
@@ -46,6 +48,20 @@ public class RabbitMQConfig {
                 .bind(queueMensajeria)
                 .to(tickettiExchange)
                 .with(ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue queueDevolucion() {
+        return QueueBuilder.durable(QUEUE_DEVOLUCION).build();
+    }
+
+    @Bean
+    public Binding bindingDevolucion(Queue queueDevolucion,
+                                     DirectExchange tickettiExchange) {
+        return BindingBuilder
+                .bind(queueDevolucion)
+                .to(tickettiExchange)
+                .with(ROUTING_KEY_DEVOLUCION);
     }
 
     @Bean
