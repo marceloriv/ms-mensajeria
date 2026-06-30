@@ -39,8 +39,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - ticketti-network
     environment:
@@ -69,7 +67,7 @@ services:
       # JWT
       JWT_SECRET: ${JWT_SECRET}
       # Config Server (opcional)
-      SPRING_CONFIG_IMPORT: optional:configserver:${CONFIG_SERVER_URL:-http://host.docker.internal:8888}
+      SPRING_CONFIG_IMPORT: optional:configserver:${CONFIG_SERVER_URL:-http://config-server:8888}
       # Eureka (usar el servicio discovery-server en la red docker)
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://discovery-server:8761/eureka/}
 

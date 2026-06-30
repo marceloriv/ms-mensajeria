@@ -5,6 +5,7 @@ import com.ticketti.ms_mensajeria.enums.TipoNotificacion;
 import com.ticketti.ms_mensajeria.model.NotificacionModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -25,4 +26,8 @@ public interface NotificacionRepository
     // Verificar si ya se envió confirmación para una compra
     boolean existsByIdCompraAndTipo(
             Long idCompra, TipoNotificacion tipo);
+
+    // Deduplicación: verificar si ya existe una notificación del mismo tipo para el mismo correo recientemente
+    boolean existsByCorreoDestinatarioAndTipoAndFechaCreacionAfter(
+            String correoDestinatario, TipoNotificacion tipo, LocalDateTime fechaLimite);
 }
