@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -85,6 +86,14 @@ public class NotificacionService {
 
     /** POST /contacto — guarda en BD y dispara correos en background */
     public void enviarContacto(NotificacionContactoRequest req) {
+        // Deduplicación: evitar correos duplicados si el cliente reintenta tras 503
+        LocalDateTime limite = LocalDateTime.now().minusMinutes(5);
+        if (notificacionRepository.existsByCorreoDestinatarioAndTipoAndFechaCreacionAfter(
+                req.getCorreo(), TipoNotificacion.CONTACTO, limite)) {
+            log.warn("Notificación CONTACTO duplicada omitida para correo: {}", req.getCorreo());
+            return;
+        }
+
         NotificacionModel notif = factory.crearContacto(req, mailConfig.getMailFrom());
         notif = notificacionRepository.save(notif);
         mailAsyncSender.enviarCorreoSimple(notif);
