@@ -209,7 +209,7 @@ public class NotificationFactory {
               <li><strong>Organizador:</strong> %s</li>
             </ul>
             <p>Se adjunta el documento de respaldo para validar la legitimidad de la causa.
-            Si corresponde, actívala con <code>PUT /api/v1/causas/%d/activar</code>.</p>
+            Si corresponde, actívala en lka plataforma</p>
             """,
                 dto.getNombreCausa(), dto.getIdCausa(), dto.getNombreOrganizador(), dto.getIdCausa()
         );
