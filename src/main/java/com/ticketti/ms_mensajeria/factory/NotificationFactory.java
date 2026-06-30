@@ -107,6 +107,22 @@ public class NotificationFactory {
                 .build();
     }
 
+    /**
+     * Crea la notificación de documento de respaldo de una causa social,
+     * dirigida al equipo Ticketti para que la valide y la active.
+     */
+    public NotificacionModel crearDocumentoCausa(
+            EnviarDocumentoCausaRequestDTO dto, String correoEquipo) {
+        return NotificacionModel.builder()
+                .idUsuario(0L)
+                .correoDestinatario(correoEquipo)
+                .nombreDestinatario("Equipo Ticketti")
+                .tipo(TipoNotificacion.DOCUMENTO_CAUSA)
+                .asunto("Documento de validación — causa social: " + dto.getNombreCausa())
+                .contenido(buildContenidoDocumentoCausa(dto))
+                .build();
+    }
+
     // --- Constructores de contenido HTML ---
 
     private String buildContenidoContacto(NotificacionContactoRequest req) {
@@ -183,6 +199,20 @@ public class NotificationFactory {
         }
         sb.append("</ul>");
         return sb.toString();
+    }
+
+    private String buildContenidoDocumentoCausa(EnviarDocumentoCausaRequestDTO dto) {
+        return String.format("""
+            <h2>Nuevo documento de respaldo de causa social</h2>
+            <ul>
+              <li><strong>Causa:</strong> %s (ID %d)</li>
+              <li><strong>Organizador:</strong> %s</li>
+            </ul>
+            <p>Se adjunta el documento de respaldo para validar la legitimidad de la causa.
+            Si corresponde, actívala con <code>PUT /api/v1/causas/%d/activar</code>.</p>
+            """,
+                dto.getNombreCausa(), dto.getIdCausa(), dto.getNombreOrganizador(), dto.getIdCausa()
+        );
     }
 
     private String buildContenidoRecordatorio(

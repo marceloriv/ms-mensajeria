@@ -59,6 +59,36 @@ public class MailAsyncSender {
     }
 
     @Async
+    public void enviarDocumentoCausa(NotificacionModel notif, byte[] archivoBytes, String nombreArchivo) {
+        RegistroEnvioModel registro = RegistroEnvioModel.builder()
+                .notificacion(notif)
+                .build();
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(mailConfig.getMailFrom());
+            helper.setTo(notif.getCorreoDestinatario());
+            helper.setSubject(notif.getAsunto());
+            helper.setText(notif.getContenido(), true);
+            helper.addAttachment(nombreArchivo, new ByteArrayResource(archivoBytes));
+            mailSender.send(message);
+            notif.setEstado(EstadoNotificacion.ENVIADO);
+            notif.setFechaEnvio(LocalDateTime.now());
+            notificacionRepository.save(notif);
+            registro.setExitoso(true);
+            log.info("Documento de causa enviado a {}", notif.getCorreoDestinatario());
+        } catch (Exception e) {
+            notif.setEstado(EstadoNotificacion.FALLIDO);
+            notificacionRepository.save(notif);
+            registro.setExitoso(false);
+            registro.setDetalleError(e.getMessage());
+            log.error("Error enviando documento de causa a {}: {}", notif.getCorreoDestinatario(), e.getMessage());
+        } finally {
+            registroEnvioRepository.save(registro);
+        }
+    }
+
+    @Async
     public void enviarCorreoSimple(NotificacionModel notif) {
         RegistroEnvioModel registro = RegistroEnvioModel.builder()
                 .notificacion(notif)
