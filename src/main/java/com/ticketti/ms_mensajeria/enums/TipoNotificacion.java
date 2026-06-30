@@ -10,5 +10,6 @@ public enum TipoNotificacion {
     RECOMENDACION,         // solo si hay consentimiento explícito
     DEVOLUCION,            // notificación de reembolso aprobado/rechazado
     RECORDATORIO_EVENTO,   // aviso "tu evento es mañana"
-    CONTACTO               // mensaje desde el formulario de contacto
+    CONTACTO,              // mensaje desde el formulario de contacto
+    DOCUMENTO_CAUSA        // PDF de respaldo de causa social para validación
 }

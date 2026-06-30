@@ -91,6 +91,18 @@ public class NotificacionService {
         mailAsyncSender.enviarAutoReply(req);
     }
 
+    /**
+     * POST /causa-documento — el PDF de respaldo de la causa social no se
+     * persiste (no hay disco compartido en ECS/Fargate); se reenvía por
+     * correo al equipo para validación manual.
+     */
+    public void enviarDocumentoCausa(EnviarDocumentoCausaRequestDTO dto) {
+        NotificacionModel notif = factory.crearDocumentoCausa(dto, mailConfig.getMailFrom());
+        notif = notificacionRepository.save(notif);
+        byte[] archivoBytes = java.util.Base64.getDecoder().decode(dto.getArchivoBase64());
+        mailAsyncSender.enviarDocumentoCausa(notif, archivoBytes, dto.getNombreArchivo());
+    }
+
     /** GET /historial/{idUsuario} */
     public List<NotificacionResponseDTO> historial(Long idUsuario) {
         return notificacionRepository

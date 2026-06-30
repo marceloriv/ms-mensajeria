@@ -71,6 +71,15 @@ public class NotificacionController {
         return ResponseEntity.ok().build();
     }
 
+    // POST /api/notificaciones/causa-documento (llamado por ms-donaciones vía Feign)
+    @PostMapping("/causa-documento")
+    @Operation(summary = "Reenviar por correo el documento de respaldo de una causa social")
+    public ResponseEntity<Void> enviarDocumentoCausa(
+            @Valid @RequestBody EnviarDocumentoCausaRequestDTO dto) {
+        notificacionService.enviarDocumentoCausa(dto);
+        return ResponseEntity.ok().build();
+    }
+
     // GET /api/notificaciones/historial/{idUsuario}
     @GetMapping("/historial/{idUsuario}")
     @Operation(summary = "Historial de notificaciones de un usuario")
