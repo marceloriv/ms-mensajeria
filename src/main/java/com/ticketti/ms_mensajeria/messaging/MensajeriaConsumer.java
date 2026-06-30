@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Consumer de RabbitMQ para MS-Mensajería.
@@ -30,6 +31,7 @@ public class MensajeriaConsumer {
     private final NotificacionService notificacionService;
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_MENSAJERIA)
+    @Transactional
     public void procesarCompraConfirmada(
             CompraConfirmadaEvent evento) {
 
@@ -84,6 +86,7 @@ public class MensajeriaConsumer {
     }
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_DEVOLUCION)
+    @Transactional
     public void procesarDevolucion(CompraConfirmadaEvent evento) {
         log.info("Evento recibido en devolucion.queue: carrito={}, usuario={}",
                 evento.getIdCarrito(), evento.getUsuarioId());

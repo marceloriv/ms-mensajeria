@@ -11,7 +11,9 @@ import com.ticketti.ms_mensajeria.model.NotificacionModel;
 import com.ticketti.ms_mensajeria.repository.NotificacionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,17 +34,28 @@ public class NotificacionService {
      * Flujo: Factory crea notificación → guarda en BD →
      * genera QR → envía correo con QR adjunto (asíncrono)
      */
+    @Transactional
     public NotificacionResponseDTO enviarTicket(EnviarTicketRequestDTO dto) {
 
         if (notificacionRepository.existsByIdCompraAndTipo(
                 dto.getIdCompra(),
                 TipoNotificacion.CONFIRMACION_COMPRA)) {
+            log.warn("Notificación duplicada omitida para compra {}", dto.getIdCompra());
             throw new BusinessException(
                     "Ya se envió confirmación para la compra " + dto.getIdCompra());
         }
 
         NotificacionModel notif = factory.crearConfirmacionCompra(dto);
-        notif = notificacionRepository.save(notif);
+        try {
+            notif = notificacionRepository.save(notif);
+        } catch (DataIntegrityViolationException e) {
+            // Red de seguridad: el UNIQUE (id_compra, tipo) en BD previene duplicidad
+            // incluso si dos hilos superan el check existsBy simultáneamente.
+            log.warn("Notificación duplicada bloqueada por constraint BD para compra {}",
+                    dto.getIdCompra());
+            throw new BusinessException(
+                    "Ya se envió confirmación para la compra " + dto.getIdCompra());
+        }
 
         byte[] qrBytes = qrService.generarQr(dto.getCodigoQr());
         mailAsyncSender.enviarCorreoConQr(notif, qrBytes);

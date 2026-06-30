@@ -8,7 +8,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "notificacion")
+@Table(
+    name = "notificacion",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uq_notificacion_compra_tipo",
+        columnNames = {"id_compra", "tipo"}
+    )
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
